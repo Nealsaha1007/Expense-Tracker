@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reset Firebase Session</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #4285f4;
+      color: white;
+      border: none;
+      border-radius: 4px;
+    }
+    .success {
+      color: green;
+      font-weight: bold;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Firebase Session Reset Tool</h1>
+  <p>Use this page to clear your Firebase auth state and browser storage</p>
+  
+  <button id="clearButton">Clear All Browser Storage</button>
+  <p id="status"></p>
+  
+  <script>
+    document.getElementById('clearButton').addEventListener('click', function() {
+      // Clear all browser storage
+      try {
+        // Clear localStorage
+        localStorage.clear();
+        
+        // Clear sessionStorage
+        sessionStorage.clear();
+        
+        // Clear indexedDB (Firebase uses this)
+        const databases = ['firebaseLocalStorageDb', 'firestore'];
+        databases.forEach(dbName => {
+          const req = indexedDB.deleteDatabase(dbName);
+          req.onsuccess = () => console.log(`${dbName} deleted successfully`);
+          req.onerror = () => console.error(`Error deleting ${dbName}`);
+        });
+        
+        // Clear cookies
+        document.cookie.split(";").forEach(function(c) {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+        });
+        
+        document.getElementById('status').innerHTML = 'Storage cleared successfully! <br><br><a href="/">Return to App</a>';
+        document.getElementById('status').className = 'success';
+      } catch (error) {
+        document.getElementById('status').innerHTML = 'Error clearing storage: ' + error.message;
+        document.getElementById('status').className = 'error';
+      }
+    });
+  </script>
+</body>
+</html> 
